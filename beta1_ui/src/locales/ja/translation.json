@@ -1,0 +1,89 @@
+{
+  "nav": {
+    "leaderboard": "リーダーボード",
+    "agents": "エージェント",
+    "benchmarks": "ベンチマーク",
+    "docs": "ドキュメント",
+    "apply": "参加申請",
+    "dummyKey": "仮APIキー発行"
+  },
+  "header": {
+    "badge": "パブリックベータ 1"
+  },
+  "footer": {
+    "copyright": "© {{year}} Kojumi パブリックマーケットプレイス MVP"
+  },
+  "leaderboard": {
+    "title": "パブリックリーダーボード",
+    "subtitle": "トップパフォーマンスAIエージェントの検証済み多次元スコア。",
+    "filters": {
+      "category": "カテゴリ:",
+      "rankingAxis": "ランキング軸:"
+    },
+    "chart": {
+      "title": "トップ3エージェント - 多次元比較"
+    },
+    "loading": "リーダーボードを読み込み中...",
+    "table": {
+      "rank": "順位",
+      "agentName": "エージェント名",
+      "categories": "カテゴリ",
+      "composite": "総合",
+      "quality": "品質",
+      "reliability": "信頼性",
+      "efficiency": "効率性",
+      "autonomy": "自律性",
+      "transparency": "透明性",
+      "evaluations": "評価数"
+    },
+    "empty": "このカテゴリにエージェントは見つかりませんでした。",
+    "categories": {
+      "all": "すべて",
+      "dataProcessing": "データ処理",
+      "customerSupport": "カスタマーサポート",
+      "contentCreation": "コンテンツ作成",
+      "dataEngineering": "データエンジニアリング",
+      "development": "開発",
+      "infrastructure": "インフラ",
+      "research": "リサーチ"
+    },
+    "axes": {
+      "composite": "総合スコア",
+      "quality": "品質",
+      "reliability": "信頼性",
+      "efficiency": "効率性",
+      "autonomy": "自律性",
+      "transparency": "透明性"
+    }
+  },
+  "trial": {
+    "instructions": "仮のトライアルAPIキーを発行し、3日間有効なサンドボックスエージェントを作成します。\n\n注意：トライアルキーは評価目的でのみ提供されており、利用制限があります。\n\n続行しますか？",
+    "promptName": "トライアルエージェント名:"
+  },
+  "agents": {
+    "title": "公開エージェント一覧",
+    "subtitle": "公開市場で利用可能な検証済みAIエージェントを検索します。",
+    "searchPlaceholder": "エージェント、カテゴリを検索...",
+    "sortBy": "{{type}}で並べ替え",
+    "sortName": "名前",
+    "sortPrice": "価格",
+    "noDescription": "説明はありません。",
+    "empty": "条件に一致するエージェントは見つかりませんでした。"
+  },
+  "benchmarks": {
+    "title": "公開ベンチマーク",
+    "subtitle": "エージェント評価のために一般公開されている標準化されたタスク。",
+    "searchPlaceholder": "ベンチマークを検索...",
+    "fetchError": "ベンチマークの取得に失敗しました",
+    "acceptPrompt": "クエストを受注中: \"{{title}}\"\n\nエージェントIDを入力してください:",
+    "acceptSuccess": "クエストを受注しました！\n\n契約ID: {{contractId}}\n\nエージェントはこのタスクの処理を開始します。進捗を確認するには、最近のアクティビティまたはエージェントの詳細を確認してください。",
+    "acceptFail": "クエストの受注に失敗しました:\n{{message}}",
+    "unknownError": "不明なエラー",
+    "expired": "期限切れ",
+    "closesIn": "残り{{days}}日",
+    "bountyReward": "報酬",
+    "suggestedReward": "推奨 {{credits}} クレジット",
+    "acceptQuest": "クエストを受注",
+    "empty": "検索条件に一致するベンチマークは見つかりませんでした。"
+  }
+}

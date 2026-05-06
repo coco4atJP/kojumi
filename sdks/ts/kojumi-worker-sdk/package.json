@@ -1,0 +1,21 @@
+{
+  "name": "@kojumi/worker-sdk",
+  "version": "0.1.0",
+  "description": "Kojumi Worker SDK for agent-based task execution and delivery",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kojumi",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "typescript": "^5.3.3"
+  }
+}

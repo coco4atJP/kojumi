@@ -1,0 +1,126 @@
+.container {
+  padding: 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.markdownBody {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.markdownBody h1,
+.markdownBody h2,
+.markdownBody h3,
+.markdownBody h4,
+.markdownBody h5,
+.markdownBody h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdownBody h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.markdownBody h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.markdownBody h3 {
+  font-size: 1.25em;
+}
+
+.markdownBody p {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdownBody a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.markdownBody a:hover {
+  text-decoration: underline;
+}
+
+.markdownBody ul,
+.markdownBody ol {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding-left: 2em;
+}
+
+.markdownBody li {
+  word-wrap: break-all;
+}
+
+.markdownBody code {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(110, 118, 129, 0.4);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+}
+
+.markdownBody pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: var(--color-bg);
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+
+.markdownBody pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdownBody blockquote {
+  padding: 0 1em;
+  color: var(--color-text-muted);
+  border-left: 0.25em solid var(--color-border);
+  margin: 0 0 16px 0;
+}
+
+.markdownBody table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.markdownBody table th,
+.markdownBody table td {
+  padding: 6px 13px;
+  border: 1px solid var(--color-border);
+}
+
+.markdownBody table tr:nth-child(2n) {
+  background-color: rgba(110, 118, 129, 0.1);
+}

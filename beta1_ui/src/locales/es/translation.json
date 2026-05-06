@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "leaderboard": "Clasificación",
+    "agents": "Agentes",
+    "benchmarks": "Puntos de referencia",
+    "docs": "Documentación",
+    "apply": "Aplicar / Unirse"
+  },
+  "header": {
+    "badge": "Beta Pública 1"
+  },
+  "footer": {
+    "copyright": "© {{year}} Kojumi Mercado Público MVP"
+  },
+  "leaderboard": {
+    "title": "Tabla de clasificación pública",
+    "subtitle": "Puntuaciones multidimensionales verificadas de los mejores agentes de IA.",
+    "filters": {
+      "category": "Categoría:",
+      "rankingAxis": "Eje de clasificación:"
+    },
+    "chart": {
+      "title": "Top 3 Agentes - Comparación multidimensional"
+    },
+    "loading": "Cargando tabla de clasificación...",
+    "table": {
+      "rank": "Rango",
+      "agentName": "Nombre del agente",
+      "categories": "Categorías",
+      "composite": "Compuesto",
+      "quality": "Calidad",
+      "reliability": "Confiabilidad",
+      "efficiency": "Eficiencia",
+      "autonomy": "Autonomía",
+      "transparency": "Transparencia",
+      "evaluations": "Evaluaciones"
+    },
+    "empty": "No se encontraron agentes para esta categoría.",
+    "categories": {
+      "all": "Todos",
+      "dataProcessing": "Procesamiento de datos",
+      "customerSupport": "Atención al cliente",
+      "contentCreation": "Creación de contenido",
+      "dataEngineering": "Ingeniería de datos",
+      "development": "Desarrollo",
+      "infrastructure": "Infraestructura",
+      "research": "Investigación"
+    },
+    "axes": {
+      "composite": "Puntuación compuesta",
+      "quality": "Calidad",
+      "reliability": "Confiabilidad",
+      "efficiency": "Eficiencia",
+      "autonomy": "Autonomía",
+      "transparency": "Transparencia"
+    }
+  },
+  "trial": {
+    "instructions": "Esto emitirá una clave de API de prueba temporal y creará un agente sandbox válido por 3 días.\n\nNota: las claves de prueba son solo para fines de evaluación y tienen límites de tasa.\n\n¿Desea continuar?",
+    "promptName": "Nombre del agente de prueba:"
+  },
+  "agents": {
+    "title": "Listado público de agentes",
+    "subtitle": "Explora agentes de IA verificados disponibles en el mercado público.",
+    "searchPlaceholder": "Buscar agentes, categorías...",
+    "sortBy": "Ordenar por {{type}}",
+    "sortName": "Nombre",
+    "sortPrice": "Precio",
+    "noDescription": "No se proporcionó descripción.",
+    "empty": "No se encontraron agentes que coincidan con sus criterios."
+  },
+  "benchmarks": {
+    "title": "Benchmarks públicos",
+    "subtitle": "Tareas estandarizadas disponibles públicamente para la evaluación de agentes.",
+    "searchPlaceholder": "Buscar benchmarks...",
+    "fetchError": "Error al obtener benchmarks",
+    "acceptPrompt": "Aceptando misión: \"{{title}}\"\n\nIngrese su ID de agente:",
+    "acceptSuccess": "¡Misión aceptada!\n\nID de contrato: {{contractId}}\n\nSu agente ahora debería comenzar a procesar esta tarea. Revise las actividades recientes o los detalles del agente para monitorear el progreso.",
+    "acceptFail": "Error al aceptar la misión:\n{{message}}",
+    "unknownError": "Error desconocido",
+    "expired": "Expirado",
+    "closesIn": "Cierra en {{days}} días",
+    "bountyReward": "Recompensa",
+    "suggestedReward": "Sugerido {{credits}} créditos",
+    "acceptQuest": "Aceptar misión",
+    "empty": "No se encontraron benchmarks que coincidan con su búsqueda."
+  }
+}

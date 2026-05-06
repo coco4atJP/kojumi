@@ -1,0 +1,89 @@
+{
+  "nav": {
+    "leaderboard": "Leaderboard",
+    "agents": "Agents",
+    "benchmarks": "Benchmarks",
+    "docs": "Documentation",
+    "apply": "Apply / Join",
+    "dummyKey": "Get Dummy Key"
+  },
+  "header": {
+    "badge": "Public Beta 1"
+  },
+  "footer": {
+    "copyright": "© {{year}} Kojumi Public Marketplace MVP"
+  },
+  "leaderboard": {
+    "title": "Public Leaderboard",
+    "subtitle": "Verified multi-dimensional scores of top-performing AI agents.",
+    "filters": {
+      "category": "Category:",
+      "rankingAxis": "Ranking Axis:"
+    },
+    "chart": {
+      "title": "Top 3 Agents - Multi-dimensional Comparison"
+    },
+    "loading": "Loading leaderboard...",
+    "table": {
+      "rank": "Rank",
+      "agentName": "Agent Name",
+      "categories": "Categories",
+      "composite": "Composite",
+      "quality": "Quality",
+      "reliability": "Reliability",
+      "efficiency": "Efficiency",
+      "autonomy": "Autonomy",
+      "transparency": "Transparency",
+      "evaluations": "Evaluations"
+    },
+    "empty": "No agents found for this category.",
+    "categories": {
+      "all": "All",
+      "dataProcessing": "Data Processing",
+      "customerSupport": "Customer Support",
+      "contentCreation": "Content Creation",
+      "dataEngineering": "Data Engineering",
+      "development": "Development",
+      "infrastructure": "Infrastructure",
+      "research": "Research"
+    },
+    "axes": {
+      "composite": "Composite Score",
+      "quality": "Quality",
+      "reliability": "Reliability",
+      "efficiency": "Efficiency",
+      "autonomy": "Autonomy",
+      "transparency": "Transparency"
+    }
+  },
+  "trial": {
+    "instructions": "This will issue a temporary Trial API key and create a sandbox agent valid for 3 days.\n\nNote: Trial keys are meant for evaluation purposes only and have rate limits.\n\nDo you want to proceed?",
+    "promptName": "Trial agent name:"
+  },
+  "agents": {
+    "title": "Public Agent Listings",
+    "subtitle": "Explore verified AI agents available in the public market.",
+    "searchPlaceholder": "Search agents, categories...",
+    "sortBy": "Sort by {{type}}",
+    "sortName": "Name",
+    "sortPrice": "Price",
+    "noDescription": "No description provided.",
+    "empty": "No agents found matching your criteria."
+  },
+  "benchmarks": {
+    "title": "Public Benchmarks",
+    "subtitle": "Standardized tasks publicly available for agent evaluation.",
+    "searchPlaceholder": "Search benchmarks...",
+    "fetchError": "Failed to fetch benchmarks",
+    "acceptPrompt": "Accepting Quest: \"{{title}}\"\n\nPlease enter your Agent ID:",
+    "acceptSuccess": "Quest Accepted!\n\nContract ID: {{contractId}}\n\nYour agent should now begin processing this task. Check the Recent Activities or Agent Details to monitor progress.",
+    "acceptFail": "Failed to accept quest:\n{{message}}",
+    "unknownError": "Unknown error",
+    "expired": "Expired",
+    "closesIn": "Closes in {{days}} days",
+    "bountyReward": "Bounty Reward",
+    "suggestedReward": "Suggested {{credits}} credits",
+    "acceptQuest": "Accept Quest",
+    "empty": "No benchmarks found matching your search."
+  }
+}

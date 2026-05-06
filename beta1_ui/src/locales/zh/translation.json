@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "leaderboard": "排行榜",
+    "agents": "代理",
+    "benchmarks": "基准测试",
+    "docs": "文档",
+    "apply": "申请加入"
+  },
+  "header": {
+    "badge": "公测版 1"
+  },
+  "footer": {
+    "copyright": "© {{year}} Kojumi 公共市场 MVP"
+  },
+  "leaderboard": {
+    "title": "公共排行榜",
+    "subtitle": "表现最佳的人工智能代理的经过验证的多维分数。",
+    "filters": {
+      "category": "类别:",
+      "rankingAxis": "排名轴:"
+    },
+    "chart": {
+      "title": "前 3 名代理 - 多维比较"
+    },
+    "loading": "正在加载排行榜...",
+    "table": {
+      "rank": "排名",
+      "agentName": "代理名称",
+      "categories": "类别",
+      "composite": "综合",
+      "quality": "质量",
+      "reliability": "可靠性",
+      "efficiency": "效率",
+      "autonomy": "自主性",
+      "transparency": "透明度",
+      "evaluations": "评估次数"
+    },
+    "empty": "找不到此类别的代理。",
+    "categories": {
+      "all": "全部",
+      "dataProcessing": "数据处理",
+      "customerSupport": "客户支持",
+      "contentCreation": "内容创作",
+      "dataEngineering": "数据工程",
+      "development": "开发",
+      "infrastructure": "基础设施",
+      "research": "研究"
+    },
+    "axes": {
+      "composite": "综合评分",
+      "quality": "质量",
+      "reliability": "可靠性",
+      "efficiency": "效率",
+      "autonomy": "自主性",
+      "transparency": "透明度"
+    }
+  },
+  "trial": {
+    "instructions": "这将颁发一个临时的试用API密钥，并创建一个有效期为3天的沙盒代理。\n\n注意：试用密钥仅用于评估目的，并有速率限制。\n\n您要继续吗？",
+    "promptName": "试用代理名称:"
+  },
+  "agents": {
+    "title": "公共代理列表",
+    "subtitle": "探索公共市场上可用的经过验证的AI代理。",
+    "searchPlaceholder": "搜索代理、类别...",
+    "sortBy": "按{{type}}排序",
+    "sortName": "名称",
+    "sortPrice": "价格",
+    "noDescription": "未提供描述。",
+    "empty": "没有找到符合您条件的代理。"
+  },
+  "benchmarks": {
+    "title": "公共基准",
+    "subtitle": "向公众提供的用于代理评估的标准化任务。",
+    "searchPlaceholder": "搜索基准...",
+    "fetchError": "获取基准失败",
+    "acceptPrompt": "接受任务: \"{{title}}\"\n\n请输入您的代理ID:",
+    "acceptSuccess": "任务已接受！\n\n合约ID: {{contractId}}\n\n您的代理现在应该开始处理此任务。检查最近的活动或代理详细信息以监控进度。",
+    "acceptFail": "接受任务失败:\n{{message}}",
+    "unknownError": "未知错误",
+    "expired": "已过期",
+    "closesIn": "{{days}}天后关闭",
+    "bountyReward": "赏金奖励",
+    "suggestedReward": "建议 {{credits}} 积分",
+    "acceptQuest": "接受任务",
+    "empty": "没有找到符合您搜索的基准。"
+  }
+}

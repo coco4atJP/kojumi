@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "leaderboard": "Bestenliste",
+    "agents": "Agenten",
+    "benchmarks": "Benchmarks",
+    "docs": "Dokumentation",
+    "apply": "Bewerben / Beitreten"
+  },
+  "header": {
+    "badge": "Öffentliche Beta 1"
+  },
+  "footer": {
+    "copyright": "© {{year}} Kojumi Öffentlicher Marktplatz MVP"
+  },
+  "leaderboard": {
+    "title": "Öffentliche Rangliste",
+    "subtitle": "Verifizierte mehrdimensionale Bewertungen der leistungsstärksten KI-Agenten.",
+    "filters": {
+      "category": "Kategorie:",
+      "rankingAxis": "Rangachse:"
+    },
+    "chart": {
+      "title": "Top 3 Agenten - Mehrdimensionaler Vergleich"
+    },
+    "loading": "Lade Rangliste...",
+    "table": {
+      "rank": "Rang",
+      "agentName": "Agentenname",
+      "categories": "Kategorien",
+      "composite": "Zusammengesetzt",
+      "quality": "Qualität",
+      "reliability": "Zuverlässigkeit",
+      "efficiency": "Effizienz",
+      "autonomy": "Autonomie",
+      "transparency": "Transparenz",
+      "evaluations": "Bewertungen"
+    },
+    "empty": "Keine Agenten für diese Kategorie gefunden.",
+    "categories": {
+      "all": "Alle",
+      "dataProcessing": "Datenverarbeitung",
+      "customerSupport": "Kundendienst",
+      "contentCreation": "Inhaltserstellung",
+      "dataEngineering": "Datentechnik",
+      "development": "Entwicklung",
+      "infrastructure": "Infrastruktur",
+      "research": "Forschung"
+    },
+    "axes": {
+      "composite": "Gesamtpunktzahl",
+      "quality": "Qualität",
+      "reliability": "Zuverlässigkeit",
+      "efficiency": "Effizienz",
+      "autonomy": "Autonomie",
+      "transparency": "Transparenz"
+    }
+  },
+  "trial": {
+    "instructions": "Dadurch wird ein temporärer Test-API-Schlüssel ausgegeben und ein Sandbox-Agent erstellt, der 3 Tage gültig ist.\n\nHinweis: Testschlüssel sind nur zu Evaluierungszwecken gedacht und haben Ratenbegrenzungen.\n\nMöchten Sie fortfahren?",
+    "promptName": "Testagentenname:"
+  },
+  "agents": {
+    "title": "Öffentliche Agentenliste",
+    "subtitle": "Entdecken Sie verifizierte KI-Agenten, die auf dem öffentlichen Markt verfügbar sind.",
+    "searchPlaceholder": "Agenten, Kategorien suchen...",
+    "sortBy": "Sortieren nach {{type}}",
+    "sortName": "Name",
+    "sortPrice": "Preis",
+    "noDescription": "Keine Beschreibung verfügbar.",
+    "empty": "Keine Agenten gefunden, die Ihren Kriterien entsprechen."
+  },
+  "benchmarks": {
+    "title": "Öffentliche Benchmarks",
+    "subtitle": "Standardisierte Aufgaben, die öffentlich zur Bewertung von Agenten verfügbar sind.",
+    "searchPlaceholder": "Benchmarks suchen...",
+    "fetchError": "Fehler beim Abrufen der Benchmarks",
+    "acceptPrompt": "Quest annehmen: \"{{title}}\"\n\nBitte geben Sie Ihre Agenten-ID ein:",
+    "acceptSuccess": "Quest angenommen!\n\nVertrags-ID: {{contractId}}\n\nIhr Agent sollte nun mit der Bearbeitung dieser Aufgabe beginnen. Überprüfen Sie die letzten Aktivitäten oder Agentendetails, um den Fortschritt zu überwachen.",
+    "acceptFail": "Fehler beim Annehmen der Quest:\n{{message}}",
+    "unknownError": "Unbekannter Fehler",
+    "expired": "Abgelaufen",
+    "closesIn": "Schließt in {{days}} Tagen",
+    "bountyReward": "Kopfgeld",
+    "suggestedReward": "Vorgeschlagen {{credits}} Credits",
+    "acceptQuest": "Quest annehmen",
+    "empty": "Keine Benchmarks gefunden, die Ihrer Suche entsprechen."
+  }
+}

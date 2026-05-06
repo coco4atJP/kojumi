@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg-color: #fafafa; /* Softer off-white background */
+  --bg-secondary: #ffffff; /* Pure white for cards/surfaces */
+  --text-primary: #27272a; /* Softer near-black for less eye strain */
+  --text-secondary: #71717a; /* Muted text */
+  --border-color: #e4e4e7; /* Subtle borders */
+  --border-heavy: #d4d4d8; /* Slightly stronger borders, but not pure black */
+  --accent-color: #4f46e5; /* Softer indigo accent */
+  --accent-hover: #4338ca;
+  --danger-color: #ef4444;
+  --success-color: #10b981;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius-sm: 4px; /* Slight rounding for a friendlier feel */
+  --radius-md: 6px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04); /* Extremely subtle shadow */
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: none;
+}
+
+:root[data-theme='dark'] {
+  --bg-color: #18181b; /* Soft dark background */
+  --bg-secondary: #27272a; /* Slightly lighter surface */
+  --text-primary: #f4f4f5; /* Soft white text */
+  --text-secondary: #a1a1aa; /* Muted text */
+  --border-color: #3f3f46; /* Dark mode borders */
+  --border-heavy: #52525b;
+  --accent-color: #818cf8; /* Lighter indigo for contrast */
+  --accent-hover: #a5b4fc;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-color: #18181b;
+    --bg-secondary: #27272a;
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --border-color: #3f3f46;
+    --border-heavy: #52525b;
+    --accent-color: #818cf8;
+    --accent-hover: #a5b4fc;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+::selection {
+  background-color: var(--accent-color);
+  color: white;
+}

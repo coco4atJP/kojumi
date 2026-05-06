@@ -1,0 +1,204 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Agent {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  categories  String   // カンマ区切り（例: "code,design,data"）
+  basePrice   Float    // 【Beta1要件】仮想クレジットとして扱う
+  owner       String?  // 開発者・運営元
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+
+  contracts   Contract[]
+
+  @@index([status, createdAt])
+}
+
+model Contract {
+  id           String   @id @default(uuid())
+  requesterId  String
+  agentId      String
+  benchmarkId  String?  // 公式ベンチマークタスクの場合にIDを保持
+  taskCategory String
+  brief        String
+  budget       Float    // 【Beta1要件】仮想クレジット（実体のお金ではない）
+  status       String
+  createdAt    DateTime @default(now())
+
+  agent        Agent        @relation(fields: [agentId], references: [id])
+  benchmark    BenchmarkTask? @relation(fields: [benchmarkId], references: [id])
+  executions   Execution[]
+  deliveries   Delivery[]
+  settlements  Settlement[]
+  disputes     Dispute[]
+
+  @@index([agentId, createdAt])
+  @@index([taskCategory])
+  @@index([status, createdAt])
+  @@index([benchmarkId])
+}
+
+model Execution {
+  id         String   @id @default(uuid())
+  contractId String
+  status     String
+  progress   Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  contract   Contract         @relation(fields: [contractId], references: [id])
+  events     ExecutionEvent[]
+  deliveries Delivery[]
+
+  @@index([contractId, updatedAt])
+  @@index([status, updatedAt])
+}
+
+model ExecutionEvent {
+  id          String   @id @default(uuid())
+  executionId String
+  eventType   String
+  message     String
+  createdAt   DateTime @default(now())
+
+  execution   Execution @relation(fields: [executionId], references: [id])
+
+  @@index([executionId, createdAt])
+}
+
+model Delivery {
+  id          String   @id @default(uuid())
+  contractId  String
+  executionId String
+  outputUri   String
+  summary     String
+  status      String
+  createdAt   DateTime @default(now())
+
+  contract    Contract     @relation(fields: [contractId], references: [id])
+  execution   Execution    @relation(fields: [executionId], references: [id])
+  evaluations Evaluation[]
+
+  @@index([contractId, createdAt])
+  @@index([executionId])
+  @@index([status, createdAt])
+}
+
+model Evidence {
+  id           String   @id @default(uuid())
+  contractId   String?
+  executionId  String?
+  source       String
+  evidenceType String
+  payloadJson  String   // JSONを文字列として保存
+  qualityScore Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([contractId, createdAt])
+  @@index([executionId])
+}
+
+model Evaluation {
+  id               String   @id @default(uuid())
+  contractId       String
+  deliveryId       String   @unique
+  qualityScore     Float
+  speedScore       Float
+  costScore        Float
+  evidenceScore    Float
+  reliabilityScore Float
+  totalScore       Float
+  jwsPayload       String?  // 元の署名付きJWSデータ
+  featuresJson     String?  // パースされたCanonical Features (JSON)
+  createdAt        DateTime @default(now())
+
+  delivery         Delivery @relation(fields: [deliveryId], references: [id])
+
+  @@index([contractId, createdAt])
+  @@index([createdAt])
+}
+
+model Settlement {
+  id         String   @id @default(uuid())
+  contractId String
+  amount     Float
+  status     String   // 【Beta1要件】 "mocked_beta1" として固定
+  createdAt  DateTime @default(now())
+
+  contract   Contract @relation(fields: [contractId], references: [id])
+
+  @@index([contractId, createdAt])
+}
+
+model Dispute {
+  id         String   @id @default(uuid())
+  contractId String
+  reason     String
+  status     String
+  createdAt  DateTime @default(now())
+
+  contract   Contract @relation(fields: [contractId], references: [id])
+
+  @@index([contractId, createdAt])
+}
+
+model OnboardingProfile {
+  id               String   @id @default(uuid())
+  agentName        String
+  tier             String
+  contactEmail     String
+  adapterType      String
+  evidenceTemplate String
+  createdAt        DateTime @default(now())
+}
+
+model BenchmarkTask {
+  id                String        @id @default(uuid())
+  title             String
+  description       String
+  category          String
+  difficulty        String        @default("medium") // easy, medium, hard
+  reward            Float         // 仮想クレジットの報酬額
+  qualityStatus     String        @default("experimental") // experimental, reviewed, verified, archived
+  leaderboardWeight Float         @default(0.3)
+  requesterTag      String        @default("official")
+  organizerType     String        @default("platform") // platform, requester, agent, community
+  benchmarkCupId    String?
+  metadataJson      String?       // テストケースや評価基準などの詳細（JSON）
+  hostingUrl        String?
+  healthcheckUrl    String?
+  healthStatus      String        @default("unknown") // unknown, healthy, stale, unhealthy
+  lastHeartbeatAt   DateTime?
+  status            String        @default("active")
+  expiresAt         DateTime?     // 期限付きバウンティ用
+  createdAt         DateTime      @default(now())
+
+  benchmarkCup      BenchmarkCup? @relation(fields: [benchmarkCupId], references: [id])
+  contracts         Contract[]
+
+  @@index([status, requesterTag, createdAt])
+  @@index([status, category, createdAt])
+  @@index([benchmarkCupId, status])
+}
+
+model BenchmarkCup {
+  id           String          @id @default(uuid())
+  slug         String          @unique
+  title        String
+  description  String
+  requesterTag String
+  status       String          @default("active")
+  createdAt    DateTime        @default(now())
+
+  benchmarks   BenchmarkTask[]
+
+  @@index([status, createdAt])
+  @@index([requesterTag])
+}

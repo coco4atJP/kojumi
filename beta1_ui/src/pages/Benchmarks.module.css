@@ -1,0 +1,315 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.searchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-secondary);
+}
+
+.searchInput {
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  width: 300px;
+  transition: all 0.15s ease-out;
+  box-shadow: var(--shadow-sm);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  transition: all 0.2s ease-out;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.requesterTag,
+.cupTag,
+.healthTag,
+.qualityTag,
+.weightTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.requesterTag {
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+}
+
+.cupTag {
+  color: #0f766e;
+  border-color: rgba(15, 118, 110, 0.22);
+  background-color: rgba(15, 118, 110, 0.08);
+}
+
+.healthTag {
+  color: var(--text-secondary);
+  background-color: rgba(148, 163, 184, 0.12);
+}
+
+.qualityTag,
+.weightTag {
+  color: #334155;
+  background-color: rgba(100, 116, 139, 0.08);
+}
+
+.experimental {
+  color: #6d28d9;
+  border-color: rgba(109, 40, 217, 0.28);
+  background-color: rgba(109, 40, 217, 0.07);
+}
+
+.reviewed {
+  color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.28);
+  background-color: rgba(37, 99, 235, 0.07);
+}
+
+.verified {
+  color: var(--success-color);
+  border-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.08);
+}
+
+.archived {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  background-color: var(--bg-color);
+}
+
+.healthy {
+  color: var(--success-color);
+  border-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.08);
+}
+
+.stale,
+.unknown {
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.28);
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+.unhealthy {
+  color: var(--danger-color);
+  border-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+  background-color: transparent;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  transition: background-color 0.2s ease-out;
+}
+
+.card:hover {
+  border-color: var(--border-heavy);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card:hover::before {
+  background-color: var(--accent-color);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.bmTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.difficulty {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.easy {
+  color: var(--success-color);
+  border-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.medium {
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.3);
+  background-color: rgba(217, 119, 6, 0.05);
+}
+
+.hard {
+  color: var(--danger-color);
+  border-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.meta {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reward {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.suggestedReward {
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  padding: 4rem 0;
+  text-align: left;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.error {
+  color: var(--danger-color);
+  padding: 1rem;
+  border: 1px solid var(--danger-color);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Skeletons */
+.skeleton {
+  pointer-events: none;
+}
+.skeletonHeader {
+  height: 1.5rem;
+  width: 70%;
+  background-color: var(--border-color);
+  margin-bottom: 1rem;
+}
+.skeletonText {
+  height: 1rem;
+  width: 100%;
+  background-color: var(--border-color);
+  margin-bottom: 0.5rem;
+}
