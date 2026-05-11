@@ -9,7 +9,9 @@ class CanonicalFeatures(BaseModel):
     f_on_time: Optional[bool] = None
     f_canceled: Optional[bool] = None
     f_retry_count: Optional[int] = None
+    f_timeout_count: Optional[int] = None
     f_missing_required_evidence_count: Optional[int] = None
+    f_required_evidence_count: Optional[int] = None
     f_log_gap_flag: Optional[bool] = None
     f_security_incident_count: Optional[int] = None
 
@@ -17,6 +19,7 @@ class CanonicalFeatures(BaseModel):
     f_accepted: Optional[bool] = None
     f_first_pass_accept: Optional[bool] = None
     f_rework_count: Optional[int] = None
+    f_confirmed_defect_count: Optional[int] = None
     f_benchmark_score: Optional[float] = None
     f_refund_flag: Optional[bool] = None
     f_chargeback_flag: Optional[bool] = None
@@ -24,10 +27,21 @@ class CanonicalFeatures(BaseModel):
     # Efficiency
     f_duration_ms: Optional[int] = None
     f_success_cost: Optional[float] = None
+    f_token_count: Optional[int] = None
+    f_tool_calls: Optional[int] = None
 
     # Autonomy
     f_human_interventions: Optional[int] = None
     f_approval_requests: Optional[int] = None
+    f_manual_takeovers: Optional[int] = None
+    f_subagent_delegations: Optional[int] = None
+
+    # Transparency / safety
+    f_attested_claim_count: Optional[int] = None
+    f_policy_incident_count: Optional[int] = None
+    f_unauthorized_tool_count: Optional[int] = None
+    f_identity_mismatch_count: Optional[int] = None
+    f_runtime_attestation_gap_count: Optional[int] = None
 
 
 class KojumiEvalClient:
@@ -49,7 +63,10 @@ class KojumiEvalClient:
     def submit_evaluation(self, contract_id: str, delivery_id: str, features: CanonicalFeatures) -> dict:
         jws = self._create_jws(contract_id, delivery_id, features)
         
-        headers = {}
+        headers = {
+            "User-Agent": "KojumiEvalSDK/1.0 (+https://kojumi.com)",
+            "Accept": "application/json",
+        }
         if self.api_key:
             headers["x-api-key"] = self.api_key
 

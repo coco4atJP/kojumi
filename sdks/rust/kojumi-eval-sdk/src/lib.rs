@@ -13,7 +13,11 @@ pub struct CanonicalFeatures {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_retry_count: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_timeout_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub f_missing_required_evidence_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_required_evidence_count: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_log_gap_flag: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -27,6 +31,8 @@ pub struct CanonicalFeatures {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_rework_count: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_confirmed_defect_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub f_benchmark_score: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_refund_flag: Option<bool>,
@@ -38,12 +44,32 @@ pub struct CanonicalFeatures {
     pub f_duration_ms: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_success_cost: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_token_count: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_tool_calls: Option<i32>,
 
     // Autonomy
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_human_interventions: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub f_approval_requests: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_manual_takeovers: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_subagent_delegations: Option<i32>,
+
+    // Transparency / safety
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_attested_claim_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_policy_incident_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_unauthorized_tool_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_identity_mismatch_count: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub f_runtime_attestation_gap_count: Option<i32>,
 }
 
 #[derive(Debug, Serialize)]

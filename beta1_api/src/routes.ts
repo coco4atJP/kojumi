@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { Prisma } from '@prisma/client';
 import { prisma } from './index';
 import { issueTrialApiKey } from './auth';
-import { calculateReliability, calculateQuality, calculateEfficiency, calculateAutonomy, calculateTransparencySafety, calculateComposite } from './scoring';
+import { calculateReliability, calculateQuality, calculateEfficiency, calculateAutonomy, calculateTransparencySafety, calculateComposite, scoreLowBetter, clamp } from './scoring';
 import { logger } from './logger';
 
 const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000');
@@ -27,21 +27,31 @@ interface EvaluationFeatures {
   f_on_time?: boolean;
   f_canceled?: boolean;
   f_retry_count?: number;
+  f_timeout_count?: number;
   f_missing_required_evidence_count?: number;
+  f_required_evidence_count?: number;
   f_log_gap_flag?: boolean;
   f_security_incident_count?: number;
   f_accepted?: boolean;
   f_first_pass_accept?: boolean;
   f_rework_count?: number;
+  f_confirmed_defect_count?: number;
   f_benchmark_score?: number;
   f_refund_flag?: boolean;
   f_chargeback_flag?: boolean;
   f_duration_ms?: number;
   f_success_cost?: number;
+  f_token_count?: number;
+  f_tool_calls?: number;
   f_human_interventions?: number;
   f_approval_requests?: number;
   f_manual_takeovers?: number;
+  f_subagent_delegations?: number;
+  f_attested_claim_count?: number;
   f_policy_incident_count?: number;
+  f_unauthorized_tool_count?: number;
+  f_identity_mismatch_count?: number;
+  f_runtime_attestation_gap_count?: number;
 }
 
 interface EvaluationJwsPayload {
@@ -55,6 +65,72 @@ interface VerifiedEvaluationJwsPayload {
   delivery_id: string;
   features: EvaluationFeatures;
 }
+
+const DEFAULT_BASELINE_DURATION_MS = Number(process.env.KOJUMI_BASELINE_DURATION_MS || 30000);
+const DEFAULT_BASELINE_SUCCESS_COST = Number(process.env.KOJUMI_BASELINE_SUCCESS_COST || 1.5);
+const DEFAULT_BASELINE_TOKEN_COUNT = Number(process.env.KOJUMI_BASELINE_TOKEN_COUNT || 8000);
+const DEFAULT_BASELINE_TOOL_CALLS = Number(process.env.KOJUMI_BASELINE_TOOL_CALLS || 20);
+
+const finiteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const optionalBoolScore = (value: boolean | undefined, trueScore = 1, falseScore = 0): number | null =>
+  typeof value === 'boolean' ? (value ? trueScore : falseScore) : null;
+
+const optionalInverseBoolScore = (value: boolean | undefined): number | null =>
+  typeof value === 'boolean' ? (value ? 0 : 1) : null;
+
+const optionalPresenceRate = (value: boolean | undefined): number | null =>
+  typeof value === 'boolean' ? (value ? 1 : 0) : null;
+
+const optionalCountRate = (value: number | undefined): number | null =>
+  finiteNumber(value) ? (value > 0 ? 1 : 0) : null;
+
+const lowCountScore = (value: number | undefined): number | null => {
+  if (!finiteNumber(value)) return null;
+  if (value <= 0) return 1;
+  return clamp(1 / (1 + value));
+};
+
+const evidenceCompletenessScore = (missingCount?: number, requiredCount?: number): number | null => {
+  if (!finiteNumber(missingCount)) return null;
+  if (finiteNumber(requiredCount) && requiredCount > 0) {
+    return clamp((requiredCount - missingCount) / requiredCount);
+  }
+  return missingCount <= 0 ? 1 : 0.5;
+};
+
+const coverageScore = (coveredCount?: number, requiredCount?: number): number | null => {
+  if (!finiteNumber(coveredCount) || !finiteNumber(requiredCount) || requiredCount <= 0) return null;
+  return clamp(coveredCount / requiredCount);
+};
+
+const scoreLowBetterOptional = (value?: number, baseline?: number): number | null => {
+  if (!finiteNumber(value) || !finiteNumber(baseline) || baseline <= 0 || value <= 0) return null;
+  return scoreLowBetter(value, baseline);
+};
+
+const metadataNumber = (metadata: any, keys: string[]): number | undefined => {
+  for (const key of keys) {
+    const segments = key.split('.');
+    let current = metadata;
+    for (const segment of segments) {
+      current = current?.[segment];
+    }
+    if (finiteNumber(current)) return current;
+  }
+  return undefined;
+};
+
+const parseJsonObject = (value?: string | null): Record<string, any> => {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+};
 
 const rateLimitCleanupTimer = setInterval(() => {
   const now = Date.now();
@@ -1168,7 +1244,8 @@ export function setupRoutes(app: Express) {
       const recentDeliveries = recentEvaluations.map(ev => ({
         taskName: ev.delivery.contract.benchmark?.title || ev.delivery.contract.brief,
         score: ev.totalScore,
-        date: ev.createdAt
+        date: ev.createdAt,
+        status: ev.delivery.status
       }));
 
       res.json({
@@ -1587,51 +1664,89 @@ export function setupRoutes(app: Express) {
         return res.status(200).json(existingEvaluation);
       }
 
+      const contract = await prisma.contract.findUnique({
+        where: { id: contract_id },
+        include: { benchmark: true },
+      });
+      const benchmarkMetadata = parseJsonObject(contract?.benchmark?.metadataJson);
+      const durationBaseline =
+        metadataNumber(benchmarkMetadata, [
+          'scoring_baselines.duration_ms',
+          'performance_targets.duration_ms',
+          'performance_targets.target_duration_ms',
+          'target_duration_ms',
+        ]) ?? DEFAULT_BASELINE_DURATION_MS;
+      const successCostBaseline =
+        metadataNumber(benchmarkMetadata, [
+          'scoring_baselines.success_cost',
+          'performance_targets.success_cost',
+          'performance_targets.target_success_cost',
+          'target_success_cost',
+        ]) ?? DEFAULT_BASELINE_SUCCESS_COST;
+      const tokenCountBaseline =
+        metadataNumber(benchmarkMetadata, [
+          'scoring_baselines.token_count',
+          'performance_targets.token_count',
+          'target_token_count',
+        ]) ?? DEFAULT_BASELINE_TOKEN_COUNT;
+      const toolCallsBaseline =
+        metadataNumber(benchmarkMetadata, [
+          'scoring_baselines.tool_calls',
+          'performance_targets.tool_calls',
+          'target_tool_calls',
+        ]) ?? DEFAULT_BASELINE_TOOL_CALLS;
+
       // Calculate new 5-axis scores using v0.1 scoring engine based on canonical features
       const rScore = calculateReliability({
-        completionRate: features.f_completed ? 1 : 0,
-        onTimeRate: features.f_on_time ? 1 : 0,
-        nonCancelRate: features.f_canceled ? 0 : 1,
-        lowRetryScore: features.f_retry_count === 0 ? 1 : 0.5, // simplified
-        evidenceCompletenessRate: features.f_missing_required_evidence_count === 0 ? 1 : 0.5,
-        timeoutRate: 0,
-        logGapRate: features.f_log_gap_flag ? 1 : 0,
-        severeIncidentRate: (features.f_security_incident_count ?? 0) > 0 ? 1 : 0
+        completionRate: optionalBoolScore(features.f_completed),
+        onTimeRate: optionalBoolScore(features.f_on_time),
+        nonCancelRate: optionalInverseBoolScore(features.f_canceled),
+        lowRetryScore: lowCountScore(features.f_retry_count),
+        evidenceCompletenessRate: evidenceCompletenessScore(
+          features.f_missing_required_evidence_count,
+          features.f_required_evidence_count,
+        ),
+        timeoutRate: optionalCountRate(features.f_timeout_count),
+        logGapRate: optionalPresenceRate(features.f_log_gap_flag),
+        severeIncidentRate: optionalCountRate(features.f_security_incident_count)
       });
 
       const qScore = calculateQuality({
-        acceptanceRate: features.f_accepted ? 1 : 0,
-        firstPassAcceptRate: features.f_first_pass_accept ? 1 : 0,
-        lowReworkScore: features.f_rework_count === 0 ? 1 : 0.5,
-        benchmarkScore: features.f_benchmark_score || 0.5,
-        repeatHireScore: 0.5,
-        confirmedDefectRate: 0,
-        refundRate: features.f_refund_flag ? 1 : 0,
-        chargebackRate: features.f_chargeback_flag ? 1 : 0
+        acceptanceRate: optionalBoolScore(features.f_accepted),
+        firstPassAcceptRate: optionalBoolScore(features.f_first_pass_accept),
+        lowReworkScore: lowCountScore(features.f_rework_count),
+        benchmarkScore: finiteNumber(features.f_benchmark_score) ? features.f_benchmark_score : null,
+        repeatHireScore: null,
+        confirmedDefectRate: optionalCountRate(features.f_confirmed_defect_count),
+        refundRate: optionalPresenceRate(features.f_refund_flag),
+        chargebackRate: optionalPresenceRate(features.f_chargeback_flag)
       });
 
       const eScore = calculateEfficiency({
-        durationScore: features.f_duration_ms ? (100000 / features.f_duration_ms) : 0.5, // naive norm
-        successCostScore: features.f_success_cost ? (10 / features.f_success_cost) : 0.5,
-        tokenEfficiencyScore: 0.5,
-        toolEfficiencyScore: 0.5
+        durationScore: scoreLowBetterOptional(features.f_duration_ms, durationBaseline),
+        successCostScore: scoreLowBetterOptional(features.f_success_cost, successCostBaseline),
+        tokenEfficiencyScore: scoreLowBetterOptional(features.f_token_count, tokenCountBaseline),
+        toolEfficiencyScore: scoreLowBetterOptional(features.f_tool_calls, toolCallsBaseline)
       });
 
       const aScore = calculateAutonomy({
-        humanFreeCompletionRate: features.f_human_interventions === 0 ? 1 : 0,
-        lowApprovalRequestScore: features.f_approval_requests === 0 ? 1 : 0.5,
-        lowManualTakeoverScore: features.f_manual_takeovers === 0 ? 1 : 0,
-        delegationEffectivenessScore: 0.5
+        humanFreeCompletionRate: lowCountScore(features.f_human_interventions),
+        lowApprovalRequestScore: lowCountScore(features.f_approval_requests),
+        lowManualTakeoverScore: lowCountScore(features.f_manual_takeovers),
+        delegationEffectivenessScore: lowCountScore(features.f_subagent_delegations)
       });
 
       const tScore = calculateTransparencySafety({
-        requiredEvidenceScore: features.f_missing_required_evidence_count === 0 ? 1 : 0,
-        trustIntegrityScore: 1, // Since it's attested (JWS), this is high
-        attestedClaimCoverage: 1,
-        policyIncidentRate: (features.f_policy_incident_count ?? 0) > 0 ? 1 : 0,
-        unauthorizedToolRate: 0,
-        identityMismatchRate: 0,
-        runtimeAttestationGapRate: 0
+        requiredEvidenceScore: evidenceCompletenessScore(
+          features.f_missing_required_evidence_count,
+          features.f_required_evidence_count,
+        ),
+        trustIntegrityScore: 1, // JWS verification succeeded for this evaluation.
+        attestedClaimCoverage: coverageScore(features.f_attested_claim_count, features.f_required_evidence_count),
+        policyIncidentRate: optionalCountRate(features.f_policy_incident_count),
+        unauthorizedToolRate: optionalCountRate(features.f_unauthorized_tool_count),
+        identityMismatchRate: optionalCountRate(features.f_identity_mismatch_count),
+        runtimeAttestationGapRate: optionalCountRate(features.f_runtime_attestation_gap_count)
       });
 
       const composite = calculateComposite(rScore, qScore, eScore, aScore, tScore);

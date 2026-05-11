@@ -81,6 +81,51 @@ def env_float(name, default):
     except ValueError:
         return default
 
+def as_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in ("1", "true", "yes", "on"):
+            return True
+        if lowered in ("0", "false", "no", "off"):
+            return False
+    return None
+
+def as_int(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+def as_float(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+def first_present(mapping, *keys):
+    if not isinstance(mapping, dict):
+        return None
+    for key in keys:
+        current = mapping
+        for part in key.split("."):
+            if not isinstance(current, dict) or part not in current:
+                current = None
+                break
+            current = current[part]
+        if current is not None:
+            return current
+    return None
+
+def delivery_metadata(downloaded_data):
+    metadata = downloaded_data.get("metadata", {}) if isinstance(downloaded_data, dict) else {}
+    return metadata if isinstance(metadata, dict) else {}
+
 def retry_without_reasoning_param(error):
     message = str(error).lower()
     return any(token in message for token in (
@@ -199,6 +244,142 @@ def eval_models_for_tier(tier):
     if tier == "high":
         return os.getenv("EVAL_HIGH_MODEL", os.getenv("EVAL_MODEL", ""))
     return os.getenv("EVAL_MODEL", "")
+
+def normalize_rule_field_aliases(downloaded_data):
+    if not isinstance(downloaded_data, dict):
+        return downloaded_data
+
+    if "rows" in downloaded_data and "csv_rows" not in downloaded_data:
+        downloaded_data["csv_rows"] = downloaded_data["rows"]
+
+    text_output = str(downloaded_data.get("text_output") or "")
+    if "bibtex_entries" not in downloaded_data and text_output:
+        entries = re.findall(r"@\w+\s*\{[^@]+", text_output, flags=re.DOTALL)
+        if entries:
+            downloaded_data["bibtex_entries"] = entries
+
+    if "items" in downloaded_data and "extracted_skus" not in downloaded_data:
+        downloaded_data["extracted_skus"] = downloaded_data["items"]
+
+    return downloaded_data
+
+def infer_strategy(task_metadata):
+    strategy = task_metadata.get("evaluation_strategy", {})
+    if isinstance(strategy, dict) and strategy.get("type"):
+        return strategy
+
+    criteria = task_metadata.get("evaluation_criteria")
+    if criteria:
+        criteria_text = criteria if isinstance(criteria, str) else json.dumps(criteria, ensure_ascii=False)
+        return {
+            "type": "llm_judge",
+            "criteria": criteria_text,
+            "inferred_from_evaluation_criteria": True,
+        }
+
+    return strategy if isinstance(strategy, dict) else {}
+
+def infer_required_evidence_count(task_metadata, evaluation_result, downloaded_data):
+    metadata = delivery_metadata(downloaded_data)
+    explicit = as_int(first_present(metadata, "required_evidence_count", "evidence.required_count"))
+    if explicit is not None:
+        return explicit
+
+    total_rules = evaluation_result.get("total_rules")
+    if isinstance(total_rules, int) and total_rules > 0:
+        return total_rules
+
+    expected_format = str(task_metadata.get("expected_output_format") or "").strip()
+    if expected_format:
+        return 1
+    return None
+
+def infer_missing_required_evidence_count(required_count, evaluation_result, downloaded_data):
+    metadata = delivery_metadata(downloaded_data)
+    explicit = as_int(first_present(metadata, "missing_required_evidence_count", "evidence.missing_count"))
+    if explicit is not None:
+        return explicit
+
+    failed_rules = evaluation_result.get("failed_rules")
+    if isinstance(failed_rules, int):
+        return failed_rules
+
+    if required_count is None:
+        return None
+
+    has_artifact = bool(str(downloaded_data.get("text_output") or "").strip())
+    has_structured = any(key in downloaded_data for key in ("json_output", "items", "rows", "csv_rows", "bibtex_entries"))
+    return 0 if has_artifact or has_structured else required_count
+
+def infer_attested_claim_count(required_count, missing_count, downloaded_data):
+    metadata = delivery_metadata(downloaded_data)
+    explicit = as_int(first_present(metadata, "attested_claim_count", "evidence.attested_claim_count"))
+    if explicit is not None:
+        return explicit
+
+    if required_count is not None and missing_count is not None:
+        return max(0, required_count - missing_count)
+
+    text = str(downloaded_data.get("text_output") or "").lower()
+    evidence_markers = ("source", "reference", "citation", "appendix", "calculation", "rationale", "assumption", "根拠", "引用", "前提")
+    return sum(1 for marker in evidence_markers if marker in text) or None
+
+def build_canonical_features(task_metadata, downloaded_data, evaluation_result):
+    metadata = delivery_metadata(downloaded_data)
+    accepted = bool(evaluation_result.get("accepted", False))
+    completed = bool(evaluation_result.get("completed", False))
+    accuracy = as_float(evaluation_result.get("accuracy"))
+    required_evidence_count = infer_required_evidence_count(task_metadata, evaluation_result, downloaded_data)
+    missing_required_evidence_count = infer_missing_required_evidence_count(
+        required_evidence_count,
+        evaluation_result,
+        downloaded_data,
+    )
+
+    return CanonicalFeatures(
+        # Reliability
+        f_completed=completed,
+        f_on_time=as_bool(first_present(metadata, "on_time", "timing.on_time")),
+        f_canceled=as_bool(first_present(metadata, "canceled", "cancelled")),
+        f_retry_count=as_int(first_present(metadata, "retry_count", "retries")),
+        f_timeout_count=as_int(first_present(metadata, "timeout_count", "timeouts")),
+        f_missing_required_evidence_count=missing_required_evidence_count,
+        f_required_evidence_count=required_evidence_count,
+        f_log_gap_flag=as_bool(first_present(metadata, "log_gap_flag", "logs.gap_flag")),
+        f_security_incident_count=as_int(first_present(metadata, "security_incident_count", "security.incident_count")),
+
+        # Quality
+        f_accepted=accepted,
+        f_first_pass_accept=accepted,
+        f_rework_count=0 if accepted else 1,
+        f_confirmed_defect_count=as_int(first_present(metadata, "confirmed_defect_count", "defects.confirmed_count")),
+        f_benchmark_score=accuracy,
+        f_refund_flag=as_bool(first_present(metadata, "refund_flag", "refund")),
+        f_chargeback_flag=as_bool(first_present(metadata, "chargeback_flag", "chargeback")),
+
+        # Efficiency
+        f_duration_ms=as_int(first_present(metadata, "duration_ms", "timing.duration_ms")),
+        f_success_cost=as_float(first_present(metadata, "success_cost", "cost.success_cost")),
+        f_token_count=as_int(first_present(metadata, "token_count", "tokens", "usage.total_tokens")),
+        f_tool_calls=as_int(first_present(metadata, "tool_calls", "tool_call_count")),
+
+        # Autonomy
+        f_human_interventions=as_int(first_present(metadata, "human_interventions", "human_intervention_count")),
+        f_approval_requests=as_int(first_present(metadata, "approval_requests", "approval_request_count")),
+        f_manual_takeovers=as_int(first_present(metadata, "manual_takeovers", "manual_takeover_count")),
+        f_subagent_delegations=as_int(first_present(metadata, "subagent_delegations", "subagent_delegation_count")),
+
+        # Transparency / safety
+        f_attested_claim_count=infer_attested_claim_count(
+            required_evidence_count,
+            missing_required_evidence_count,
+            downloaded_data,
+        ),
+        f_policy_incident_count=as_int(first_present(metadata, "policy_incident_count", "policy.incident_count")),
+        f_unauthorized_tool_count=as_int(first_present(metadata, "unauthorized_tool_count", "tools.unauthorized_count")),
+        f_identity_mismatch_count=as_int(first_present(metadata, "identity_mismatch_count", "identity.mismatch_count")),
+        f_runtime_attestation_gap_count=as_int(first_present(metadata, "runtime_attestation_gap_count", "attestation.gap_count")),
+    )
 
 class HybridEvaluator:
     _last_llm_call_times = {}
@@ -349,24 +530,107 @@ class HybridEvaluator:
         return max(0.0, min(1.0, quality)), "; ".join(rationales)
 
     @classmethod
-    def evaluate(cls, task_metadata, downloaded_data, delivery=None):
-        strategy = task_metadata.get("evaluation_strategy", {})
-        strategy_type = strategy.get("type", "unknown")
+    def evaluate_with_llm(cls, task_metadata, downloaded_data, delivery=None):
+        normalize_rule_field_aliases(downloaded_data)
+        strategy = infer_strategy(task_metadata)
+        criteria = (
+            strategy.get("criteria")
+            or strategy.get("rubric")
+            or task_metadata.get("evaluation_criteria")
+            or task_metadata.get("evaluationCriteria")
+            or json.dumps(strategy, ensure_ascii=False)
+        )
         tier = infer_evaluation_tier(task_metadata, delivery)
-        
+        eval_models_str = eval_models_for_tier(tier)
+
+        if eval_models_str:
+            try:
+                submission = compact_text(downloaded_data.get("text_output", ""), env_int("EVAL_SUBMISSION_MAX_CHARS", 8000))
+                criteria_text = compact_text(criteria, env_int("EVAL_CRITERIA_MAX_CHARS", 2500))
+                if tier in ("high", "frontier") and env_bool("EVAL_MULTI_CHECK", True):
+                    score, reasoning = cls.evaluate_multi_check(eval_models_str, criteria_text, submission, tier)
+                    used_model = eval_models_str
+                else:
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a strict benchmark evaluator. Use the chat template normally and reason if needed. "
+                                "The final answer must contain no explanatory prose. End with exactly:\n"
+                                "FINAL_JSON:\n{\"score\": 0.0, \"reasoning\": \"<=160 chars\"}"
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": (
+                                "Grade the submission strictly against the criteria.\n"
+                                "Final output format must be exactly FINAL_JSON followed by one JSON object.\n"
+                                "Score is a float from 0.0 to 1.0.\n\n"
+                                f"Criteria:\n{criteria_text}\n\n"
+                                f"Submission:\n{submission}"
+                            )
+                        }
+                    ]
+                    score, reasoning, used_model = cls._judge_with_fallbacks(eval_models_str, messages, f"{tier} LLM Judge")
+                print(f"       🧠 {tier} LLM Judge ({used_model}): '{reasoning}' -> Score: {score:.2f}")
+                return score
+
+            except Exception as e:
+                print(f"       ⚠️ LLM Judge evaluation failed ({e}). Falling back to heuristic.")
+                text_content = downloaded_data.get("text_output", "")
+                return min(0.95, 0.6 + (len(text_content) / 2000)) if len(text_content) > 100 else 0.3
+        text_content = downloaded_data.get("text_output", "")
+        score = min(0.95, 0.6 + (len(text_content) / 2000)) if len(text_content) > 100 else 0.3
+        print(f"       🧠 Simulated Judge (No EVAL_MODEL set) -> Score: {score:.2f}")
+        return score
+
+    @classmethod
+    def evaluate_rule_based(cls, strategy, downloaded_data):
+        rules = strategy.get("rules", [])
+        passed_rules = 0
+
+        for rule in rules:
+            field = rule.get("field")
+            if field in downloaded_data:
+                passed = True
+                if "type" in rule:
+                    expected_type = rule["type"]
+                    val = downloaded_data[field]
+                    if expected_type == "array" and not isinstance(val, list): passed = False
+                    if expected_type == "boolean" and not isinstance(val, bool): passed = False
+
+                if "min_length" in rule:
+                    if len(downloaded_data[field]) < rule["min_length"]: passed = False
+
+                if passed:
+                    passed_rules += 1
+
+        if len(rules) > 0:
+            return passed_rules / len(rules)
+        return 1.0
+
+    @classmethod
+    def evaluate(cls, task_metadata, downloaded_data, delivery=None):
+        normalize_rule_field_aliases(downloaded_data)
+        strategy = infer_strategy(task_metadata)
+        strategy_type = str(strategy.get("type", "")).strip().lower()
+        tier = infer_evaluation_tier(task_metadata, delivery)
+
         metrics = {
             "accuracy": 0.0,
             "completed": downloaded_data.get("completed", False),
-            "accepted": False
+            "accepted": False,
+            "passed_rules": None,
+            "failed_rules": None,
+            "total_rules": None
         }
-        
+
         if is_gdpval_metadata(task_metadata):
             metrics["accuracy"] = cls.evaluate_gdpval(task_metadata, downloaded_data, delivery)
-
         elif strategy_type == "rule_based":
             rules = strategy.get("rules", [])
             passed_rules = 0
-            
+
             for rule in rules:
                 field = rule.get("field")
                 if field in downloaded_data:
@@ -374,66 +638,31 @@ class HybridEvaluator:
                     if "type" in rule:
                         expected_type = rule["type"]
                         val = downloaded_data[field]
-                        if expected_type == "array" and not isinstance(val, list): passed = False
-                        if expected_type == "boolean" and not isinstance(val, bool): passed = False
-                    
-                    if "min_length" in rule:
-                        if len(downloaded_data[field]) < rule["min_length"]: passed = False
-                        
+                        if expected_type == "array" and not isinstance(val, list):
+                            passed = False
+                        if expected_type == "boolean" and not isinstance(val, bool):
+                            passed = False
+
+                    if "min_length" in rule and len(downloaded_data[field]) < rule["min_length"]:
+                        passed = False
+
                     if passed:
                         passed_rules += 1
-                        
-            if len(rules) > 0:
+
+            if rules:
                 metrics["accuracy"] = passed_rules / len(rules)
+                metrics["passed_rules"] = passed_rules
+                metrics["failed_rules"] = len(rules) - passed_rules
+                metrics["total_rules"] = len(rules)
             else:
                 metrics["accuracy"] = 1.0
-                
+                metrics["passed_rules"] = 0
+                metrics["failed_rules"] = 0
+                metrics["total_rules"] = 0
         elif strategy_type == "llm_judge":
-            criteria = strategy.get("criteria", "")
-            eval_models_str = eval_models_for_tier(tier)
-            
-            if eval_models_str:
-                try:
-                    submission = compact_text(downloaded_data.get("text_output", ""), env_int("EVAL_SUBMISSION_MAX_CHARS", 8000))
-                    criteria_text = compact_text(criteria, env_int("EVAL_CRITERIA_MAX_CHARS", 2500))
-                    if tier in ("high", "frontier") and env_bool("EVAL_MULTI_CHECK", True):
-                        score, reasoning = cls.evaluate_multi_check(eval_models_str, criteria_text, submission, tier)
-                        used_model = eval_models_str
-                    else:
-                        messages = [
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are a strict benchmark evaluator. Use the chat template normally and reason if needed. "
-                                    "The final answer must contain no explanatory prose. End with exactly:\n"
-                                    "FINAL_JSON:\n{\"score\": 0.0, \"reasoning\": \"<=160 chars\"}"
-                                )
-                            },
-                            {
-                                "role": "user",
-                                "content": (
-                                    "Grade the submission strictly against the criteria.\n"
-                                    "Final output format must be exactly FINAL_JSON followed by one JSON object.\n"
-                                    "Score is a float from 0.0 to 1.0.\n\n"
-                                    f"Criteria:\n{criteria_text}\n\n"
-                                    f"Submission:\n{submission}"
-                                )
-                            }
-                        ]
-                        score, reasoning, used_model = cls._judge_with_fallbacks(eval_models_str, messages, f"{tier} LLM Judge")
-                    metrics["accuracy"] = score
-                    print(f"       🧠 {tier} LLM Judge ({used_model}): '{reasoning}' -> Score: {metrics['accuracy']:.2f}")
-                    
-                except Exception as e:
-                    print(f"       ⚠️ LLM Judge evaluation failed ({e}). Falling back to heuristic.")
-                    text_content = downloaded_data.get("text_output", "")
-                    metrics["accuracy"] = min(0.95, 0.6 + (len(text_content) / 2000)) if len(text_content) > 100 else 0.3
-            else:
-                text_content = downloaded_data.get("text_output", "")
-                metrics["accuracy"] = min(0.95, 0.6 + (len(text_content) / 2000)) if len(text_content) > 100 else 0.3
-                print(f"       🧠 Simulated Judge (No EVAL_MODEL set) -> Score: {metrics['accuracy']:.2f}")
+            metrics["accuracy"] = cls.evaluate_with_llm(task_metadata, downloaded_data, delivery)
         else:
-            metrics["accuracy"] = downloaded_data.get("accuracy", 0.5)
+            metrics["accuracy"] = cls.evaluate_with_llm(task_metadata, downloaded_data, delivery)
 
         metrics["accepted"] = metrics["accuracy"] >= 0.6
         return metrics
@@ -510,7 +739,13 @@ class HybridEvaluator:
         return 0.3
 
 def get_headers():
-    return {"x-api-key": API_KEY} if API_KEY else {}
+    headers = {
+        "User-Agent": "KojumiOfficialEvaluator/1.0 (+https://kojumi.com)",
+        "Accept": "application/json,text/plain,*/*",
+    }
+    if API_KEY:
+        headers["x-api-key"] = API_KEY
+    return headers
 
 def parse_delivery_artifact(task_metadata, response):
     expected_format = str(task_metadata.get("expected_output_format") or "").lower()
@@ -538,10 +773,16 @@ def parse_delivery_artifact(task_metadata, response):
 
     if expects_csv:
         reader = csv.DictReader(io.StringIO(raw_text))
-        normalized["rows"] = list(reader)
+        rows = list(reader)
+        normalized["rows"] = rows
+        normalized["csv_rows"] = rows
         return normalized
 
-    if "markdown" in expected_format or "bibtex" in expected_format or "text" in expected_format:
+    if "bibtex" in expected_format:
+        normalized["bibtex_entries"] = re.findall(r"@\w+\s*\{[^@]+", raw_text, flags=re.DOTALL)
+        return normalized
+
+    if "markdown" in expected_format or "text" in expected_format:
         return normalized
 
     if "application/json" in content_type:
@@ -595,16 +836,15 @@ def run_daemon():
 
                 # 3. Evaluate
                 evaluation_result = HybridEvaluator.evaluate(task_metadata, downloaded_data, delivery)
-                
-                features = CanonicalFeatures(
-                    f_completed=evaluation_result.get("completed", False),
-                    f_accepted=evaluation_result.get("accepted", False),
-                    f_duration_ms=downloaded_data.get("metadata", {}).get("duration_ms", 10000),
-                    f_success_cost=downloaded_data.get("metadata", {}).get("success_cost", 0.5),
-                    f_tool_calls=downloaded_data.get("metadata", {}).get("tool_calls", 10),
-                    f_approval_requests=downloaded_data.get("metadata", {}).get("approval_requests", 0),
-                    f_subagent_delegations=downloaded_data.get("metadata", {}).get("subagent_delegations", 0),
-                    f_benchmark_score=evaluation_result.get("accuracy", 0.0)
+                features = build_canonical_features(task_metadata, downloaded_data, evaluation_result)
+                print(
+                    "🧾 Canonical features: "
+                    f"completed={features.f_completed}, accepted={features.f_accepted}, "
+                    f"benchmark={features.f_benchmark_score}, duration_ms={features.f_duration_ms}, "
+                    f"cost={features.f_success_cost}, tool_calls={features.f_tool_calls}, "
+                    f"approval_requests={features.f_approval_requests}, "
+                    f"missing_evidence={features.f_missing_required_evidence_count}/"
+                    f"{features.f_required_evidence_count}"
                 )
 
                 # 4. Submit Evaluation

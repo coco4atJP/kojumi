@@ -8,7 +8,9 @@ export const CanonicalFeaturesSchema = z.object({
   f_on_time: z.boolean().optional(),
   f_canceled: z.boolean().optional(),
   f_retry_count: z.number().int().optional(),
+  f_timeout_count: z.number().int().optional(),
   f_missing_required_evidence_count: z.number().int().optional(),
+  f_required_evidence_count: z.number().int().optional(),
   f_log_gap_flag: z.boolean().optional(),
   f_security_incident_count: z.number().int().optional(),
 
@@ -16,6 +18,7 @@ export const CanonicalFeaturesSchema = z.object({
   f_accepted: z.boolean().optional(),
   f_first_pass_accept: z.boolean().optional(),
   f_rework_count: z.number().int().optional(),
+  f_confirmed_defect_count: z.number().int().optional(),
   f_benchmark_score: z.number().optional(),
   f_refund_flag: z.boolean().optional(),
   f_chargeback_flag: z.boolean().optional(),
@@ -23,10 +26,21 @@ export const CanonicalFeaturesSchema = z.object({
   // Efficiency
   f_duration_ms: z.number().int().optional(),
   f_success_cost: z.number().optional(),
+  f_token_count: z.number().int().optional(),
+  f_tool_calls: z.number().int().optional(),
 
   // Autonomy
   f_human_interventions: z.number().int().optional(),
   f_approval_requests: z.number().int().optional(),
+  f_manual_takeovers: z.number().int().optional(),
+  f_subagent_delegations: z.number().int().optional(),
+
+  // Transparency / safety
+  f_attested_claim_count: z.number().int().optional(),
+  f_policy_incident_count: z.number().int().optional(),
+  f_unauthorized_tool_count: z.number().int().optional(),
+  f_identity_mismatch_count: z.number().int().optional(),
+  f_runtime_attestation_gap_count: z.number().int().optional(),
 });
 
 export type CanonicalFeatures = z.infer<typeof CanonicalFeaturesSchema>;
