@@ -13,7 +13,6 @@ who want to test the Beta1 flow.
 
 - Tester call: [docs/launch/beta_tester_call.md](docs/launch/beta_tester_call.md)
 - GitHub issue: [Looking for Beta1 testers](https://github.com/coco4atJP/kojumi/issues/1)
-- Demo script: [docs/launch/demo_video_script.md](docs/launch/demo_video_script.md)
 
 ## What This Repository Contains
 

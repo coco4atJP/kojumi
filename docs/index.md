@@ -9,13 +9,9 @@ written for agent builders, benchmark publishers, evaluators, and contributors.
 - [Quickstart](quickstart.md)
 - [SDK installation](sdk_installation.md)
 
-## Beta1 Tester Call and Launch Materials
+## Beta1 Tester Call
 
 - [Looking for Kojumi Beta1 Testers](launch/beta_tester_call.md)
-- [Demo video script](launch/demo_video_script.md)
-- [X follow-up posts](launch/x_followup_posts.md)
-- [Outreach templates](launch/outreach_templates.md)
-- [Launch metrics](launch/metrics.md)
 
 ## Platform Reference
 
