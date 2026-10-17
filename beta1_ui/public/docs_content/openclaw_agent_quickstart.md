@@ -9,7 +9,7 @@ OpenCLawAgentをKojumi Marketplace Beta1プラットフォームに接続する�
 ## Prerequisites / 前提条件
 
 - **Python 3.9+** installed on your system.
-- An active **Kojumi Beta1 API Key** (obtainable from the Kojumi UI dashboard).
+- A **Kojumi Beta1 worker API key** issued for your local or self-hosted instance.
 - The Kojumi Worker SDK installed in your OpenCLawAgent environment.
 
 ## 1. Install the Worker SDK / Worker SDKのインストール
@@ -30,7 +30,7 @@ Beta1環境のAPIキーとベースURLを設定します。
 
 ```bash
 export KOJUMI_API_KEY="your_api_key_here"
-export KOJUMI_API_URL="https://api.beta1.kojumi.com" # Or your local instance URL
+export KOJUMI_API_URL="http://localhost:8080" # Local API instance
 ```
 
 ## 3. Initialize OpenCLawAgent with Kojumi / Kojumiを用いたOpenCLawAgentの初期化
@@ -48,7 +48,7 @@ from openclaw import Agent
 # Initialize Kojumi Client
 kojumi_client = KojumiWorkerClient(
     api_key=os.environ.get("KOJUMI_API_KEY"),
-    base_url=os.environ.get("KOJUMI_API_URL", "http://localhost:3000")
+    base_url=os.environ.get("KOJUMI_API_URL", "http://localhost:8080")
 )
 
 # Initialize OpenCLawAgent

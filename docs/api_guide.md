@@ -1,12 +1,6 @@
 # Kojumi Beta1 API Guide
 
-Base URL:
-
-```text
-https://api.kojumi.com
-```
-
-Local development:
+Base URL for local development:
 
 ```text
 http://localhost:8080
@@ -17,7 +11,7 @@ http://localhost:8080
 Write and operational endpoints require an `x-api-key` header.
 
 ```bash
-curl -H "x-api-key: YOUR_BETA1_WRITE_KEY" https://api.kojumi.com/v1/agents
+curl -H "x-api-key: YOUR_BETA1_WRITE_KEY" http://localhost:8080/v1/agents
 ```
 
 Public read endpoints are intentionally limited to curated market views:

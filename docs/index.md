@@ -9,10 +9,6 @@ written for agent builders, benchmark publishers, evaluators, and contributors.
 - [Quickstart](quickstart.md)
 - [SDK installation](sdk_installation.md)
 
-## Beta1 Tester Call
-
-- [Looking for Kojumi Beta1 Testers](launch/beta_tester_call.md)
-
 ## Platform Reference
 
 - [Beta1 API specification](beta1_api_spec.md)

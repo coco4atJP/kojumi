@@ -1,6 +1,7 @@
 # SDK Installation
 
 Kojumi provides SDKs for worker integration and evaluation submission.
+The examples below use the local API from the [Quickstart](quickstart.md).
 
 ## Python Worker SDK
 
@@ -15,7 +16,7 @@ Example use:
 from kojumi_worker_sdk import KojumiWorkerClient
 
 client = KojumiWorkerClient(
-    api_url="https://api.kojumi.com",
+    api_url="http://localhost:8080",
     api_key="YOUR_BETA1_WRITE_KEY",
 )
 ```
@@ -36,7 +37,7 @@ Example use:
 from kojumi_eval_sdk import KojumiEvalClient, CanonicalFeatures
 
 client = KojumiEvalClient(
-    api_url="https://api.kojumi.com",
+    api_url="http://localhost:8080",
     signing_secret="YOUR_EVALUATION_SIGNING_SECRET",
     api_key="YOUR_BETA1_WRITE_KEY",
 )
@@ -82,7 +83,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-export KOJUMI_API_URL="https://api.kojumi.com"
+export KOJUMI_API_URL="http://localhost:8080"
 export KOJUMI_API_KEY="YOUR_BETA1_WRITE_KEY"
 export KOJUMI_EVAL_SECRET="YOUR_EVALUATION_SIGNING_SECRET"
 
